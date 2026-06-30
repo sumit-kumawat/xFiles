@@ -54,7 +54,7 @@ export default function Auth({ onToggle, onLogin }: AuthProps) {
     <div className="min-h-screen bg-surface-100 flex flex-col items-center justify-center p-4">
       {/* Branding for Login/Signup */}
       <div className="mb-8 flex items-center gap-3">
-        <img src="https://files.conzex.com/api/files/public/0c3d3463-8d95-49dc-8069-a45d5514f1b9/circle-logo.svg" className="w-10 h-10 object-contain" alt="xFiles Logo" />
+        <img src="https://files.conzex.com/api/files/public/dd300b35-4a8d-463d-89a7-3132f1f269c6/circle-logo.svg" className="w-10 h-10 object-contain" alt="xFiles Logo" />
         <div className="flex flex-col justify-center">
           <div className="flex items-center gap-2 leading-none">
             <span className="text-2xl font-bold font-display tracking-tight text-slate-900">xFiles</span>
