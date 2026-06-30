@@ -14,7 +14,8 @@ import cors from 'cors';
 
 const isESM = typeof import.meta !== 'undefined' && typeof import.meta.url !== 'undefined';
 const _filename = isESM ? fileURLToPath(import.meta.url) : (typeof __filename !== 'undefined' ? __filename : '');
-const _dirname = isESM ? path.dirname(_filename) : (typeof __dirname !== 'undefined' ? __dirname : '');
+// Use process.cwd() as the project root so that database and uploaded files are preserved in the persistent workspace root (not wiped during builds)
+const _dirname = process.cwd();
 
 function generateAlphanumericId(length = 10): string {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

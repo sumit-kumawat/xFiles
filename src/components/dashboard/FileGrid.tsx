@@ -40,6 +40,26 @@ interface FileGridProps {
   searchQuery?: string;
 }
 
+const getPublicUrl = (id: string, name: string) => {
+  let cleanName = name;
+  try {
+    cleanName = decodeURIComponent(name);
+  } catch (e) {
+    // Ignore error
+  }
+  cleanName = cleanName
+    .replace(/%/g, '-')
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z0-9.-]/g, '-');
+  
+  cleanName = cleanName.replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+  return `/api/files/public/${id}/${cleanName}`;
+};
+
+const getAbsolutePublicUrl = (id: string, name: string) => {
+  return `${window.location.origin}${getPublicUrl(id, name)}`;
+};
+
 const getFileIcon = (file: FileItem) => {
   if (file.type === 'folder') return <Folder className="w-12 h-12 text-brand-400 fill-brand-50" />;
   
@@ -48,7 +68,7 @@ const getFileIcon = (file: FileItem) => {
     return (
       <div className="w-full h-24 rounded-lg border border-slate-200/60 overflow-hidden flex items-center justify-center bg-slate-50 shadow-xs relative">
         <img 
-          src={`/api/files/public/${file.id}/${file.name}`} 
+          src={getPublicUrl(file.id, file.name)} 
           alt={file.name} 
           className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200"
           referrerPolicy="no-referrer"
@@ -60,7 +80,7 @@ const getFileIcon = (file: FileItem) => {
     return (
       <div className="w-full h-24 rounded-lg border border-slate-200/60 overflow-hidden flex items-center justify-center bg-slate-950 relative shadow-xs">
         <video 
-          src={`/api/files/public/${file.id}/${file.name}#t=0.5`} 
+          src={`${getPublicUrl(file.id, file.name)}#t=0.5`} 
           preload="metadata"
           muted
           className="w-full h-full object-cover opacity-80"
@@ -108,7 +128,7 @@ const getFileIconTiny = (file: FileItem) => {
     return (
       <div className="w-6 h-6 rounded border border-slate-200 overflow-hidden flex items-center justify-center bg-slate-50 shrink-0 select-none shadow-xs">
         <img 
-          src={`/api/files/public/${file.id}/${file.name}`} 
+          src={getPublicUrl(file.id, file.name)} 
           alt={file.name} 
           className="w-full h-full object-cover"
           referrerPolicy="no-referrer"
@@ -311,7 +331,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
 
     if (isText) {
       setLoadingText(true);
-      const publicUrl = `/api/files/public/${previewFile.id}/${previewFile.name}`;
+      const publicUrl = getPublicUrl(previewFile.id, previewFile.name);
       fetch(publicUrl)
         .then(res => res.text())
         .then(text => {
@@ -1279,14 +1299,14 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                      previewFile.name.toLowerCase().endsWith('.ico') || 
                      previewFile.name.toLowerCase().endsWith('.bmp')) ? (
                   <img 
-                    src={`/api/files/public/${previewFile.id}/${previewFile.name}`} 
+                    src={getPublicUrl(previewFile.id, previewFile.name)} 
                     alt={previewFile.name} 
                     className="max-w-full max-h-full object-contain rounded-md shadow-sm"
                     referrerPolicy="no-referrer"
                   />
                 ) : previewFile.mime?.startsWith('video/') ? (
                   <video 
-                    src={`/api/files/public/${previewFile.id}/${previewFile.name}`} 
+                    src={getPublicUrl(previewFile.id, previewFile.name)} 
                     controls 
                     className="max-w-full max-h-full rounded-md shadow-sm"
                     autoPlay
@@ -1296,7 +1316,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                   <div className="flex flex-col items-center justify-center py-12 px-6 bg-slate-900 rounded-xl w-full max-w-md shadow-md border border-slate-800">
                     <Music className="w-14 h-14 text-pink-500 animate-bounce mb-6" />
                     <audio 
-                      src={`/api/files/public/${previewFile.id}/${previewFile.name}`} 
+                      src={getPublicUrl(previewFile.id, previewFile.name)} 
                       controls 
                       className="w-full text-slate-900"
                     />
@@ -1304,7 +1324,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                   </div>
                 ) : (previewFile.mime?.includes('pdf') || previewFile.name.toLowerCase().endsWith('.pdf')) ? (
                   <iframe 
-                    src={`/api/files/public/${previewFile.id}/${previewFile.name}`} 
+                    src={getPublicUrl(previewFile.id, previewFile.name)} 
                     className="w-full h-[400px] border-none rounded-lg bg-white"
                     title={previewFile.name}
                   />
@@ -1320,7 +1340,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                     </div>
                     <iframe 
                       src={`https://docs.google.com/gview?url=${encodeURIComponent(
-                        `${window.location.origin}/api/files/public/${previewFile.id}/${previewFile.name}`
+                        getAbsolutePublicUrl(previewFile.id, previewFile.name)
                       )}&embedded=true`} 
                       className="w-full h-[380px] border-none rounded-lg bg-white shadow-inner"
                       title={previewFile.name}
@@ -1347,14 +1367,14 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                   <input
                     type="text"
                     readOnly
-                    value={`${window.location.origin}/api/files/public/${previewFile.id}/${previewFile.name}`}
+                    value={getAbsolutePublicUrl(previewFile.id, previewFile.name)}
                     className="flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-600 select-all font-mono outline-none"
                     onClick={(e) => (e.target as HTMLInputElement).select()}
                   />
                   <button
                     type="button"
                     onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/api/files/public/${previewFile.id}/${previewFile.name}`);
+                      navigator.clipboard.writeText(getAbsolutePublicUrl(previewFile.id, previewFile.name));
                       toast.success("Public embed URL with extension copied to clipboard!");
                     }}
                     className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors shrink-0 flex items-center gap-1.5 cursor-pointer"
