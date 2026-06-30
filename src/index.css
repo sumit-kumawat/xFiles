@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-brand-50: #f0f7ff;
+  --color-brand-100: #e0effe;
+  --color-brand-200: #bae0fd;
+  --color-brand-300: #7cc8fb;
+  --color-brand-400: #38aef7;
+  --color-brand-500: #0078d4; /* OneDrive Blue */
+  --color-brand-600: #006abc;
+  --color-brand-700: #005a9e;
+  --color-brand-800: #004c83;
+  --color-brand-900: #003e6d;
+  
+  --color-surface-50: #faf9f8;
+  --color-surface-100: #f3f2f1;
+  --color-surface-200: #edebe9;
+  --color-surface-300: #e1dfdd;
+  
+  --radius-custom: 10px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface-50 text-slate-900 antialiased font-sans;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight text-slate-900;
+  }
+}
+
+.onerect {
+  border-radius: var(--radius-custom);
+}
+
+/* Glassmorphism for modern touches */
+.glass {
+  @apply bg-white/70 backdrop-blur-md border border-white/20;
+}
+
+/* Sidebar active state */
+.sidebar-item-active {
+  @apply bg-brand-100 text-brand-700 font-medium border-l-4 border-brand-500;
+}
+
+/* SEO visibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border-width: 0;
+}
+
+@keyframes rainbow-move {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.rainbow-border-wrap {
+  position: relative;
+  padding: 1.5px;
+  background: linear-gradient(90deg, #ffadad, #ffd6a5, #fdffb6, #caffbf, #9bf6ff, #a0c4ff, #bdb2ff, #ffc6ff, #ffadad);
+  background-size: 200% 200%;
+  animation: rainbow-move 6s linear infinite;
+  border-radius: 8px;
+}
+
+@keyframes rainbow-border {
+  0% {
+    background-position: 0% 0%, 0% 50%;
+  }
+  50% {
+    background-position: 0% 0%, 100% 50%;
+  }
+  100% {
+    background-position: 0% 0%, 0% 50%;
+  }
+}
+
+.rainbow-search-input {
+  position: relative;
+  border-radius: 8px;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.rainbow-search-input::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  padding: 1.5px; /* border thickness */
+  background: linear-gradient(90deg, #ffb3b3, #ffdfb3, #ffffb3, #b3ffb3, #b3d9ff, #ccb3ff, #ffb3ff, #ffb3b3);
+  background-size: 200% 200%;
+  animation: rainbow-border 6s linear infinite;
+  -webkit-mask: 
+     linear-gradient(#fff 0 0) content-box, 
+     linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.rainbow-search-input:focus-within::before {
+  background: linear-gradient(90deg, #ff9494, #ffd194, #ffff94, #94ff94, #94c8ff, #b794ff, #ff94ff, #ff9494);
+  background-size: 200% 200%;
+  animation: rainbow-border 2.5s linear infinite;
+}
+
+.rainbow-search-input:focus-within {
+  box-shadow: 0 4px 14px rgba(0, 120, 212, 0.15);
+}
+
+/* Custom tooltips to show ONLY on individual button hover */
+.tooltip-trigger {
+  position: relative;
+}
+.tooltip-trigger:hover .tooltip-target {
+  display: block !important;
+}
+
