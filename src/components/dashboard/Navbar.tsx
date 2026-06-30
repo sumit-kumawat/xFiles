@@ -121,7 +121,7 @@ export default function Navbar({ user, onUpload, onCreateFolder, onSearch, onLog
           className="flex items-center gap-2.5 text-left focus:outline-none transition-all active:scale-95 cursor-pointer group select-none"
           title="xFiles - A Conzex Global Product"
         >
-          <img src="https://files.conzex.com/api/files/public/dd300b35-4a8d-463d-89a7-3132f1f269c6/circle-logo.svg" className="w-7 h-7 object-contain group-hover:rotate-12 transition-transform duration-300" alt="xFiles Logo" />
+          <img src="https://files.conzex.com/api/files/public/ee05804c-9547-4c7f-8c23-c32e89912eeb/circle-logo.svg" className="w-7 h-7 object-contain group-hover:rotate-12 transition-transform duration-300" alt="xFiles Logo" />
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-1.5 leading-none">
               <span className="font-bold font-display tracking-tight text-[17px] text-brand-950 group-hover:text-brand-600 transition-colors">xFiles</span>

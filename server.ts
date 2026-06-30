@@ -302,7 +302,7 @@ app.post('/api/auth/register', async (req, res) => {
       `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
         <div style="text-align: center; margin-bottom: 25px;">
-          <img src="https://files.conzex.com/api/files/public/dd300b35-4a8d-463d-89a7-3132f1f269c6/circle-logo.svg" alt="xFiles Logo" style="width: 50px; height: 50px;" />
+          <img src="https://files.conzex.com/api/files/public/ee05804c-9547-4c7f-8c23-c32e89912eeb/circle-logo.svg" alt="xFiles Logo" style="width: 50px; height: 50px;" />
           <h2 style="color: #0f172a; margin-top: 10px; font-size: 22px; font-weight: 700;">Verify your xFiles Account</h2>
         </div>
         <p style="color: #475569; font-size: 14px; line-height: 1.6;">Hi <strong>${displayName || username || 'User'}</strong>,</p>
@@ -356,7 +356,7 @@ app.post('/api/auth/resend-verification', async (req, res) => {
       `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
         <div style="text-align: center; margin-bottom: 25px;">
-          <img src="https://files.conzex.com/api/files/public/dd300b35-4a8d-463d-89a7-3132f1f269c6/circle-logo.svg" alt="xFiles Logo" style="width: 50px; height: 50px;" />
+          <img src="https://files.conzex.com/api/files/public/ee05804c-9547-4c7f-8c23-c32e89912eeb/circle-logo.svg" alt="xFiles Logo" style="width: 50px; height: 50px;" />
           <h2 style="color: #0f172a; margin-top: 10px; font-size: 22px; font-weight: 700;">Verify your xFiles Account</h2>
         </div>
         <p style="color: #475569; font-size: 14px; line-height: 1.6;">Hi <strong>${user.display_name || user.username || 'User'}</strong>,</p>
@@ -452,7 +452,7 @@ app.get('/api/auth/verify', (req, res) => {
       </head>
       <body>
         <div class="card">
-          <img class="logo" src="https://files.conzex.com/api/files/public/dd300b35-4a8d-463d-89a7-3132f1f269c6/circle-logo.svg" alt="xFiles Logo" />
+          <img class="logo" src="https://files.conzex.com/api/files/public/ee05804c-9547-4c7f-8c23-c32e89912eeb/circle-logo.svg" alt="xFiles Logo" />
           <h1>Email Verified Successfully!</h1>
           <p>Your email has been successfully verified. You can now log in to your account and start managing your secure files.</p>
           <a class="btn" href="/?page=auth">Go to Login</a>
