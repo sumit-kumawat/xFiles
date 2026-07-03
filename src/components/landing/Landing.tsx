@@ -108,11 +108,11 @@ export default function Landing({ onGetStarted }: LandingProps) {
               className="mt-20 relative max-w-5xl mx-auto"
             >
               <div className="rounded-2xl border border-surface-200 bg-white p-2 shadow-2xl relative z-10 transition-transform hover:scale-[1.005] duration-500 overflow-hidden">
-                <div className="rounded-xl overflow-hidden bg-surface-50 border border-surface-100 aspect-[16/10] flex items-center justify-center">
+                <div className="rounded-xl overflow-hidden bg-surface-50 border border-surface-100 flex items-center justify-center">
                   <img 
                     src="https://files.conzex.com/api/files/public/49b7e241-ffdb-4b2b-87d2-9ff482adeb9d/xFiles-Previews.png" 
                     alt="xFiles Core Dashboard" 
-                    className="w-full h-full object-cover bg-white animate-fade-in"
+                    className="w-full h-auto object-contain bg-white animate-fade-in"
                   />
                 </div>
               </div>

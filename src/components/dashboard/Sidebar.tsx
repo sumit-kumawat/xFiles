@@ -273,7 +273,7 @@ export default function Sidebar({
               }}
               className="text-[11px] font-bold text-brand-600 hover:text-brand-700 select-none text-left tracking-tight hover:underline cursor-pointer transition-all inline-block w-fit mt-0.5"
             >
-              Request storage booster
+              Upgrade
             </button>
           </div>
         </div>

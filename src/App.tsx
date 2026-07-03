@@ -182,7 +182,7 @@ export default function App() {
       <title>xFiles</title>
       <meta name="description" content="Secure, fast, and professional cloud storage for everyone. Host your data your way." />
       
-      <Toaster richColors position="top-center" />
+      <Toaster richColors position="bottom-center" />
 
       {user ? (
         <Dashboard user={user} />
