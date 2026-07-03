@@ -686,8 +686,8 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
             )}
           </button>
 
-          {/* Action Items next to "Sort by" section (only in grid view as list view renders them in the table header card) */}
-          {viewMode === 'grid' && selectedIds.size > 0 && (
+          {/* Action Items next to "Sort by" section */}
+          {selectedIds.size > 0 && (
             <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3 py-0.5 animate-fade-in">
               <span className="text-[11px] font-bold text-brand-600 font-sans mr-1 bg-brand-50 px-2 py-1 rounded-lg">
                 {selectedIds.size} selected
@@ -828,7 +828,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
         <div className="bg-white rounded-xl border border-surface-200 shadow-xs overflow-visible">
           {/* Header Row */}
           <div className="grid grid-cols-12 items-center bg-surface-50 border-b border-surface-200 text-slate-400 font-bold text-[10px] uppercase tracking-wider py-2.5 px-4 select-none gap-4">
-            <div className="col-span-9 sm:col-span-6 md:col-span-5 lg:col-span-4 flex items-center gap-3">
+            <div className="col-span-9 sm:col-span-7 md:col-span-5 lg:col-span-4 flex items-center gap-3">
               <input 
                 type="checkbox" 
                 checked={sortedFiles.length > 0 && sortedFiles.every(f => selectedIds.has(f.id))}
@@ -842,108 +842,12 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                 onClick={(e) => e.stopPropagation()}
                 className="rounded border-slate-300 text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer"
               />
-              <span className="font-bold text-[11px] text-slate-700">
-                {selectedIds.size > 0 ? `${selectedIds.size} Selected` : 'Name'}
-              </span>
+              <span>Name</span>
             </div>
-
-            {selectedIds.size > 0 ? (
-              <div className="col-span-3 sm:col-span-6 md:col-span-7 lg:col-span-8 flex items-center justify-end gap-1.5 animate-fade-in text-right">
-                {section === 'trash' ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handleBulkRestore}
-                      className="flex items-center gap-1 px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-150 rounded-md text-[10px] font-extrabold tracking-wider transition-all cursor-pointer uppercase"
-                      title="Restore Selected"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                      <span className="hidden sm:inline">Restore</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleBulkDelete}
-                      className="flex items-center gap-1 px-2 py-1 bg-red-50 hover:bg-red-100 text-red-755 border border-red-150 rounded-md text-[10px] font-extrabold tracking-wider transition-all cursor-pointer uppercase"
-                      title="Delete Forever"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      <span className="hidden sm:inline">Delete Forever</span>
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    {/* Single selected item special actions */}
-                    {selectedIds.size === 1 && (() => {
-                      const singleItem = files.find(f => f.id === Array.from(selectedIds)[0]);
-                      if (!singleItem) return null;
-                      if (singleItem.type === 'folder') {
-                        return (
-                          <button
-                            type="button"
-                            onClick={() => onFileClick(singleItem)}
-                            className="flex items-center gap-1 px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-md text-[10px] font-extrabold tracking-wider transition-all cursor-pointer uppercase"
-                            title="Open Folder"
-                          >
-                            <ExternalLink className="w-3 h-3 text-slate-400" />
-                            <span className="hidden sm:inline">Open</span>
-                          </button>
-                        );
-                      } else {
-                        return (
-                          <button
-                            type="button"
-                            onClick={() => setPreviewFile(singleItem)}
-                            className="flex items-center gap-1 px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-md text-[10px] font-extrabold tracking-wider transition-all cursor-pointer uppercase"
-                            title="Preview File"
-                          >
-                            <Eye className="w-3 h-3 text-slate-400" />
-                            <span className="hidden sm:inline">Preview</span>
-                          </button>
-                        );
-                      }
-                    })()}
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTargetFolderId(null);
-                        setShowMoveModal(true);
-                      }}
-                      className="flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-150 rounded-md text-[10px] font-extrabold tracking-wider transition-all cursor-pointer uppercase"
-                      title="Move to Folder"
-                    >
-                      <Folder className="w-3 h-3" />
-                      <span className="hidden sm:inline">Move</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleBulkTrash}
-                      className="flex items-center gap-1 px-2 py-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-150 rounded-md text-[10px] font-extrabold tracking-wider transition-all cursor-pointer uppercase"
-                      title="Move to Trash"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      <span className="hidden sm:inline">Trash</span>
-                    </button>
-                  </>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedIds(new Set())}
-                  className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer ml-1"
-                  title="Deselect All"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="hidden md:block md:col-span-3 lg:col-span-3">Date Modified</div>
-                <div className="hidden sm:block sm:col-span-2 md:col-span-2 lg:col-span-2">Size</div>
-                <div className="hidden lg:block lg:col-span-1">Type</div>
-                <div className="col-span-3 sm:col-span-3 md:col-span-2 lg:col-span-2 text-right">Actions</div>
-              </>
-            )}
+            <div className="hidden md:block md:col-span-3 lg:col-span-3">Date Modified</div>
+            <div className="hidden sm:block sm:col-span-2 md:col-span-2 lg:col-span-2">Size</div>
+            <div className="hidden lg:block lg:col-span-1">Type</div>
+            <div className="col-span-3 sm:col-span-3 md:col-span-2 lg:col-span-2 text-right">Actions</div>
           </div>
           {/* Body Rows */}
           <div className="divide-y divide-surface-100 text-sm">

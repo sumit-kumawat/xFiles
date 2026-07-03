@@ -107,14 +107,12 @@ export default function Landing({ onGetStarted }: LandingProps) {
               transition={{ delay: 0.2, duration: 0.8 }}
               className="mt-20 relative max-w-5xl mx-auto"
             >
-              <div className="rounded-2xl border border-surface-200 bg-white p-2 shadow-2xl relative z-10 transition-transform hover:scale-[1.005] duration-500 overflow-hidden">
-                <div className="rounded-xl overflow-hidden bg-surface-50 border border-surface-100 flex items-center justify-center">
-                  <img 
-                    src="https://files.conzex.com/api/files/public/49b7e241-ffdb-4b2b-87d2-9ff482adeb9d/xFiles-Previews.png" 
-                    alt="xFiles Core Dashboard" 
-                    className="w-full h-auto object-contain bg-white animate-fade-in"
-                  />
-                </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-1.5 shadow-2xl relative z-10 transition-transform hover:scale-[1.002] duration-500 overflow-hidden">
+                <img 
+                  src="https://files.conzex.com/api/files/public/4bca6e49-1502-469c-83ec-0698e46b5abf/xFiles-Previews.png" 
+                  alt="xFiles Core Dashboard" 
+                  className="w-full h-auto object-contain rounded-xl bg-white border border-slate-100 animate-fade-in"
+                />
               </div>
               <div className="absolute -inset-4 bg-brand-500/5 blur-3xl -z-10 rounded-full" />
             </motion.div>
