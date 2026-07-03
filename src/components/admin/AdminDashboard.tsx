@@ -20,7 +20,8 @@ import {
   Music as MusicIcon,
   MoreVertical,
   CheckCircle2,
-  XCircle
+  XCircle,
+  AlertTriangle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -49,6 +50,28 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'users' | 'storage' | 'pricing' | 'requests'>('users');
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [requests, setRequests] = useState<any[]>([]);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void | Promise<void>;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedUser(null);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const loadSettings = async () => {
     const data = await api.settings.get();
@@ -136,15 +159,21 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!window.confirm('Are you absolutely sure? This will permanently delete the user and all their files.')) return;
-    try {
-      await api.admin.deleteUser(userId);
-      toast.success('User terminated successfully');
-      setSelectedUser(null);
-      loadUsers();
-    } catch (e) {
-      toast.error('Failed to delete user');
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Terminate User?',
+      message: 'Are you absolutely sure? This will permanently delete the user account and purge all their stored files from the cluster. This action is irreversible.',
+      onConfirm: async () => {
+        try {
+          await api.admin.deleteUser(userId);
+          toast.success('User terminated successfully');
+          setSelectedUser(null);
+          loadUsers();
+        } catch (e) {
+          toast.error('Failed to delete user');
+        }
+      }
+    });
   };
 
   useEffect(() => {
@@ -609,6 +638,56 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Custom Confirmation Modal */}
+      <AnimatePresence>
+        {confirmModal.isOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs" 
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-surface-200 p-6 relative z-10"
+            >
+              <div className="flex items-start gap-4 mb-4">
+                <div className="p-3 rounded-full shrink-0 bg-red-50 text-red-600">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-base font-bold text-slate-900 font-display">{confirmModal.title}</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed font-sans">{confirmModal.message}</p>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <button 
+                  onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                  className="flex-1 py-2.5 px-4 rounded-xl border border-surface-200 text-slate-600 font-bold text-sm hover:bg-surface-50 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={async () => {
+                    const run = confirmModal.onConfirm;
+                    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                    await run();
+                  }}
+                  className="flex-1 py-2.5 px-4 rounded-xl text-white font-bold text-sm transition-colors shadow-lg bg-red-600 hover:bg-red-700 shadow-red-600/10 cursor-pointer"
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

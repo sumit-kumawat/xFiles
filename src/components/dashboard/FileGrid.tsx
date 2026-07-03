@@ -23,7 +23,9 @@ import {
   ArrowDown,
   FileArchive,
   FileSpreadsheet,
-  Presentation
+  Presentation,
+  AlertTriangle,
+  Eye
 } from 'lucide-react';
 import { FileItem, Section } from '@/types';
 import { formatBytes } from '@/lib/utils';
@@ -242,6 +244,46 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
   const [targetFolderId, setTargetFolderId] = useState<string | null>(null);
   const [moving, setMoving] = useState(false);
 
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    warning?: string;
+    confirmText?: string;
+    cancelText?: string;
+    isDestructive?: boolean;
+    onConfirm: () => void | Promise<void>;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
+
+  const formatFileNameExtensionsUpper = (name: string): string => {
+    if (!name.includes('.')) return name;
+    const parts = name.split('.');
+    if (parts.length <= 1) return name;
+    const ext = parts.pop() || '';
+    return [...parts, ext.toUpperCase()].join('.');
+  };
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedIds(new Set());
+        setSelectedFile(null);
+        setRenamingFile(null);
+        setPreviewFile(null);
+        setShareFile(null);
+        setShowMoveModal(false);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   React.useEffect(() => {
     if (!searchQuery) {
       setSortField('name');
@@ -405,14 +447,28 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
 
   const handleDelete = async (file: FileItem, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm('Are you sure you want to permanently delete this item?')) return;
-    try {
-      await api.files.deletePermanent([file.id]);
-      toast.success('Item deleted permanently');
-      onRefresh();
-    } catch (e) {
-      toast.error('Failed to delete item');
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Permanently Delete Item?',
+      message: `Are you sure you want to permanently delete "${file.name}"? This action is irreversible.`,
+      warning: 'Files in Trash will be automatically deleted after 30 days.',
+      confirmText: 'Delete Permanently',
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          await api.files.deletePermanent([file.id]);
+          toast.success('Item deleted permanently');
+          setSelectedIds(prev => {
+            const next = new Set(prev);
+            next.delete(file.id);
+            return next;
+          });
+          onRefresh();
+        } catch (e) {
+          toast.error('Failed to delete item');
+        }
+      }
+    });
   };
 
   const handleBulkTrash = async () => {
@@ -441,15 +497,48 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!confirm(`Are you sure you want to permanently delete these ${selectedIds.size} items?`)) return;
-    try {
-      await api.files.deletePermanent(Array.from(selectedIds));
-      toast.success(`Permanently deleted ${selectedIds.size} items`);
-      setSelectedIds(new Set());
-      onRefresh();
-    } catch (e) {
-      toast.error('Failed to delete items');
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Permanently Delete Items?',
+      message: `Are you sure you want to permanently delete these ${selectedIds.size} selected items? This action is irreversible.`,
+      warning: 'Files in Trash will be automatically deleted after 30 days.',
+      confirmText: 'Delete Permanently',
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          await api.files.deletePermanent(Array.from(selectedIds));
+          toast.success(`Permanently deleted ${selectedIds.size} items`);
+          setSelectedIds(new Set());
+          onRefresh();
+        } catch (e) {
+          toast.error('Failed to delete items');
+        }
+      }
+    });
+  };
+
+  const handleEmptyTrash = async () => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Empty Recycle Bin?',
+      message: 'Are you sure you want to permanently delete all items in the Recycle Bin? This action is irreversible.',
+      warning: 'Files in Trash will be automatically deleted after 30 days.',
+      confirmText: 'Empty Trash',
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          const trashFileIds = files.map(f => f.id);
+          if (trashFileIds.length > 0) {
+            await api.files.deletePermanent(trashFileIds);
+            toast.success('Recycle bin emptied successfully');
+            setSelectedIds(new Set());
+            onRefresh();
+          }
+        } catch (e) {
+          toast.error('Failed to empty recycle bin');
+        }
+      }
+    });
   };
 
   const handleBulkMove = async () => {
@@ -558,7 +647,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
           <button 
             type="button"
             onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
-            className="p-1.5 bg-white hover:bg-surface-50 border border-surface-200 rounded-lg text-slate-600 shadow-xs text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+            className="p-1.5 bg-white hover:bg-surface-50 border border-surface-200 rounded-lg text-slate-600 shadow-xs text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer mr-1.5"
             title={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
           >
             {sortDirection === 'asc' ? (
@@ -573,6 +662,102 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
               </>
             )}
           </button>
+
+          {/* Action Items next to "Sort by" section */}
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3 py-0.5 animate-fade-in">
+              <span className="text-[11px] font-bold text-brand-600 font-sans mr-1 bg-brand-50 px-2 py-1 rounded-lg">
+                {selectedIds.size} selected
+              </span>
+              
+              {section === 'trash' ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleBulkRestore}
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    title="Restore Selected"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span className="hidden lg:inline">Restore</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBulkDelete}
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-750 border border-red-100 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    title="Delete Forever"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span className="hidden lg:inline">Delete Forever</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Single selected item special actions */}
+                  {selectedIds.size === 1 && (() => {
+                    const singleItem = files.find(f => f.id === Array.from(selectedIds)[0]);
+                    if (!singleItem) return null;
+                    if (singleItem.type === 'folder') {
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => onFileClick(singleItem)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                          title="Open Folder"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                          <span className="hidden lg:inline">Open</span>
+                        </button>
+                      );
+                    } else {
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => setPreviewFile(singleItem)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                          title="Preview File"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-slate-400" />
+                          <span className="hidden lg:inline">Preview</span>
+                        </button>
+                      );
+                    }
+                  })()}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTargetFolderId(null);
+                      setShowMoveModal(true);
+                    }}
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-100 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    title="Move to Folder"
+                  >
+                    <Folder className="w-3.5 h-3.5" />
+                    <span className="hidden lg:inline">Move</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBulkTrash}
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-100 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    title="Move to Trash"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span className="hidden lg:inline">Trash</span>
+                  </button>
+                </>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setSelectedIds(new Set())}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                title="Deselect All"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
           {/* Views Toggle (List/Grid) */}
           <div className="flex items-center bg-surface-100 rounded-lg p-0.5 border border-surface-200">
@@ -596,74 +781,24 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
         </div>
       </div>
 
-      <AnimatePresence>
-        {selectedIds.size > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="mb-4 bg-brand-50 border border-brand-100 rounded-xl px-4 py-3 flex flex-wrap gap-3 items-center justify-between shadow-xs select-none"
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-brand-800">
-                {selectedIds.size} {selectedIds.size === 1 ? 'item' : 'items'} selected
-              </span>
-              <button
-                type="button"
-                onClick={() => setSelectedIds(new Set())}
-                className="text-[10px] text-slate-500 hover:text-slate-800 font-bold underline transition-colors cursor-pointer"
-              >
-                Clear selection
-              </button>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {section === 'trash' ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleBulkRestore}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Restore Selected</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleBulkDelete}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Delete Forever</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTargetFolderId(null);
-                      setShowMoveModal(true);
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                  >
-                    <Folder className="w-3.5 h-3.5" />
-                    <span>Move to Folder</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleBulkTrash}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Move to Trash</span>
-                  </button>
-                </>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Persistent Recycle Bin Warning with "Empty Trash" trigger */}
+      {section === 'trash' && (
+        <div className="mb-4 bg-amber-50/70 border border-amber-200/60 rounded-xl px-4 py-2.5 text-amber-850 text-xs font-medium flex items-center justify-between gap-3 select-none">
+          <div className="flex items-center gap-2">
+            <Info className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>Files in Trash will be automatically deleted after 30 days.</span>
+          </div>
+          {files.length > 0 && (
+            <button
+              onClick={handleEmptyTrash}
+              className="text-[11px] font-bold text-red-650 hover:text-red-800 transition-colors flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-red-50 border border-red-150 rounded-lg cursor-pointer shrink-0"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Empty Trash
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Main Files Display */}
       {viewMode === 'list' ? (
@@ -709,6 +844,16 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                   onDragLeave={(e) => handleDragLeaveItem(e, file)}
                   onDrop={(e) => handleDropOnItem(e, file)}
                   onClick={() => {
+                    const next = new Set(selectedIds);
+                    if (next.has(file.id)) {
+                      next.delete(file.id);
+                    } else {
+                      next.add(file.id);
+                    }
+                    setSelectedIds(next);
+                  }}
+                  onDoubleClick={(e) => {
+                    e.stopPropagation();
                     if (file.type === 'folder') {
                       onFileClick(file);
                     } else {
@@ -723,7 +868,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                         : 'hover:bg-surface-50/70'
                   }`}
                 >
-                  <div className="col-span-9 sm:col-span-7 md:col-span-5 lg:col-span-4 font-semibold text-slate-950 min-w-0 flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                  <div className="col-span-9 sm:col-span-7 md:col-span-5 lg:col-span-4 font-semibold text-slate-950 min-w-0 flex items-center gap-3">
                     <input 
                       type="checkbox" 
                       checked={selectedIds.has(file.id)}
@@ -736,21 +881,15 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                         }
                         setSelectedIds(next);
                       }}
+                      onClick={(e) => e.stopPropagation()}
                       className="rounded border-slate-300 text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer shrink-0"
                     />
                     {getFileIconTiny(file)}
                     <span 
-                      onClick={() => {
-                        if (file.type === 'folder') {
-                           onFileClick(file);
-                        } else {
-                           setPreviewFile(file);
-                        }
-                      }}
-                      className="truncate block flex-1 hover:text-brand-600 transition-colors" 
+                      className="truncate block flex-1 hover:text-brand-600 transition-colors select-none" 
                       title={file.name}
                     >
-                      {file.name}
+                      {formatFileNameExtensionsUpper(file.name)}
                     </span>
                     {file.starred && (
                       <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
@@ -874,6 +1013,16 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                 onDragLeave={(e) => handleDragLeaveItem(e, file)}
                 onDrop={(e) => handleDropOnItem(e, file)}
                 onClick={() => {
+                  const next = new Set(selectedIds);
+                  if (next.has(file.id)) {
+                    next.delete(file.id);
+                  } else {
+                    next.add(file.id);
+                  }
+                  setSelectedIds(next);
+                }}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
                   if (file.type === 'folder') {
                     onFileClick(file);
                   } else {
@@ -1039,7 +1188,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                 
                 <div className="space-y-1">
                   <h3 className="text-sm font-semibold text-slate-900 truncate pr-4" title={file.name}>
-                    {file.name}
+                    {formatFileNameExtensionsUpper(file.name)}
                   </h3>
                   <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono font-medium uppercase">
                     <span>{file.type === 'folder' ? 'Folder' : formatBytes(file.size)}</span>
@@ -1272,7 +1421,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                     {getFileIconTiny(previewFile)}
                   </div>
                   <div className="text-left">
-                    <h3 className="text-base font-bold text-slate-900 truncate max-w-xs sm:max-w-md" title={previewFile.name}>{previewFile.name}</h3>
+                    <h3 className="text-base font-bold text-slate-900 truncate max-w-xs sm:max-w-md" title={previewFile.name}>{formatFileNameExtensionsUpper(previewFile.name)}</h3>
                     <p className="text-[10px] text-slate-400 font-mono mt-0.5">
                       {formatBytes(previewFile.size)} • {previewFile.mime || 'unknown type'}
                     </p>
@@ -1534,6 +1683,67 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                   className="px-4 py-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-brand-500/15 cursor-pointer"
                 >
                   {moving ? 'Moving...' : 'Move Items'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Custom Confirmation Modal */}
+      <AnimatePresence>
+        {confirmModal.isOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs" 
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-surface-200 p-6 relative z-10 overflow-hidden text-left"
+            >
+              <div className="flex items-start gap-4 mb-4">
+                <div className={`p-3 rounded-full shrink-0 ${confirmModal.isDestructive ? 'bg-red-50 text-red-600' : 'bg-brand-50 text-brand-600'}`}>
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-base font-bold text-slate-900 font-display">{confirmModal.title}</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed font-sans">{confirmModal.message}</p>
+                </div>
+              </div>
+
+              {confirmModal.warning && (
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-amber-800 text-[11px] font-medium leading-relaxed mb-6 select-none flex items-start gap-2">
+                  <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <span>{confirmModal.warning}</span>
+                </div>
+              )}
+              
+              <div className="flex gap-3 mt-6">
+                <button 
+                  onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                  className="flex-1 py-2.5 px-4 rounded-xl border border-surface-200 text-slate-600 font-bold text-sm hover:bg-surface-50 transition-colors cursor-pointer text-center"
+                >
+                  {confirmModal.cancelText || 'Cancel'}
+                </button>
+                <button 
+                  onClick={async () => {
+                    const run = confirmModal.onConfirm;
+                    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                    await run();
+                  }}
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-white font-bold text-sm transition-colors shadow-lg cursor-pointer text-center ${
+                    confirmModal.isDestructive 
+                      ? 'bg-red-600 hover:bg-red-750 shadow-red-600/10' 
+                      : 'bg-brand-500 hover:bg-brand-600 shadow-brand-500/10'
+                  }`}
+                >
+                  {confirmModal.confirmText || 'Confirm'}
                 </button>
               </div>
             </motion.div>

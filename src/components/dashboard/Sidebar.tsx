@@ -243,22 +243,22 @@ export default function Sidebar({
       </div>
 
       {/* Storage and branding progress meter block */}
-      <div className="mt-auto pt-4 flex flex-col gap-4 border-t border-slate-200/60 pb-4">
-        <div className="bg-slate-100 rounded-2xl p-4 border border-slate-200/60 shadow-xs">
-          <div className="flex items-center gap-2 mb-2 text-slate-700">
-             <PieChart className="w-4 h-4 text-brand-500" />
-             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 select-none">Storage Cloud</span>
+      <div className="mt-auto pt-4 flex flex-col gap-3 border-t border-slate-200/60 pb-3">
+        <div className="px-2">
+          <div className="flex items-center gap-2 mb-1.5 text-slate-600">
+             <PieChart className="w-4 h-4 text-brand-500 shrink-0" />
+             <span className="text-xs font-semibold text-slate-700 select-none">Storage</span>
           </div>
           
-          <div className="w-full bg-slate-200 rounded-full h-2 mb-2 overflow-hidden shadow-inner relative">
+          <div className="w-full bg-slate-200/70 rounded-full h-1.5 mb-2 overflow-hidden relative">
             <div 
               className={`${barColorClass} h-full rounded-full transition-all duration-500`} 
               style={{ width: `${percentage}%` }}
             />
           </div>
           
-          <div className="flex flex-col gap-1.5">
-            <p className="text-[10px] font-mono font-bold text-slate-600">
+          <div className="flex flex-col gap-1">
+            <p className="text-[11px] font-medium text-slate-500 font-sans">
               {formatBytes(storageUsed)} of {formatBytes(storageTotal)} used
             </p>
             <button 
@@ -271,16 +271,14 @@ export default function Sidebar({
                   toast.error("Failed to post storage request");
                 }
               }}
-              className="text-[10px] font-bold text-brand-600 hover:text-brand-700 select-none text-left tracking-tight underline cursor-pointer"
+              className="text-[11px] font-bold text-brand-600 hover:text-brand-700 select-none text-left tracking-tight hover:underline cursor-pointer transition-all inline-block w-fit mt-0.5"
             >
-              Request storage quota booster
+              Request storage booster
             </button>
           </div>
         </div>
         
-        <hr className="border-t border-slate-200/60" />
-        
-        <div className="px-1 text-center sm:text-left text-[10px]">
+        <div className="px-2 pt-1 text-center sm:text-left text-[10px]">
           <span className="text-slate-400">© {new Date().getFullYear()} </span>
           <a 
             href="https://conzex.com" 
