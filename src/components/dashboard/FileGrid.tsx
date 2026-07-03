@@ -20,7 +20,10 @@ import {
   X,
   Pencil,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  FileArchive,
+  FileSpreadsheet,
+  Presentation
 } from 'lucide-react';
 import { FileItem, Section } from '@/types';
 import { formatBytes } from '@/lib/utils';
@@ -60,11 +63,34 @@ const getAbsolutePublicUrl = (id: string, name: string) => {
   return `${window.location.origin}${getPublicUrl(id, name)}`;
 };
 
+const getFileCategory = (name: string, mime?: string): string => {
+  const ext = name.toLowerCase().split('.').pop() || '';
+  const m = (mime || '').toLowerCase();
+
+  if (ext === 'pdf' || m.includes('pdf')) return 'pdf';
+  if (['doc', 'docx'].includes(ext) || m.includes('word') || m.includes('msword') || m.includes('officedocument.wordprocessingml')) return 'word';
+  if (['xls', 'xlsx', 'csv'].includes(ext) || m.includes('excel') || m.includes('spreadsheet') || m.includes('officedocument.spreadsheetml') || m.includes('csv')) return 'spreadsheet';
+  if (['ppt', 'pptx'].includes(ext) || m.includes('powerpoint') || m.includes('presentation') || m.includes('officedocument.presentationml')) return 'presentation';
+  if (ext === 'txt' || m.startsWith('text/plain')) return 'text';
+
+  if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp', 'ico'].includes(ext) || m.startsWith('image/')) return 'image';
+  if (['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp'].includes(ext) || m.startsWith('video/')) return 'video';
+  if (['mp3', 'wav', 'flac', 'ogg', 'm4a', 'aac', 'wma'].includes(ext) || m.startsWith('audio/')) return 'audio';
+  
+  if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'dmg', 'iso'].includes(ext) || m.includes('zip') || m.includes('compressed') || m.includes('archive')) return 'archive';
+  
+  if (['js', 'jsx', 'ts', 'tsx', 'html', 'css', 'json', 'py', 'java', 'cpp', 'c', 'h', 'cs', 'go', 'rs', 'php', 'rb', 'swift', 'kt', 'xml', 'yaml', 'yml', 'sh', 'bash', 'sql'].includes(ext) || 
+      m.includes('javascript') || m.includes('typescript') || m.includes('html') || m.includes('json') || m.includes('css') || m.includes('code') || m.startsWith('text/')) return 'code';
+
+  return 'generic';
+};
+
 const getFileIcon = (file: FileItem) => {
   if (file.type === 'folder') return <Folder className="w-12 h-12 text-brand-400 fill-brand-50" />;
   
-  const m = file.mime?.toLowerCase() || '';
-  if (m.startsWith('image/')) {
+  const category = getFileCategory(file.name, file.mime);
+
+  if (category === 'image') {
     return (
       <div className="w-full h-24 rounded-lg border border-slate-200/60 overflow-hidden flex items-center justify-center bg-slate-50 shadow-xs relative">
         <img 
@@ -76,7 +102,7 @@ const getFileIcon = (file: FileItem) => {
       </div>
     );
   }
-  if (m.startsWith('video/')) {
+  if (category === 'video') {
     return (
       <div className="w-full h-24 rounded-lg border border-slate-200/60 overflow-hidden flex items-center justify-center bg-slate-950 relative shadow-xs">
         <video 
@@ -91,24 +117,59 @@ const getFileIcon = (file: FileItem) => {
       </div>
     );
   }
-  if (m.startsWith('audio/')) {
+  if (category === 'audio') {
     return (
       <div className="w-full h-24 rounded-lg border border-slate-200/60 overflow-hidden flex flex-col items-center justify-center bg-pink-50/40 relative shadow-xs">
         <Music className="w-10 h-10 text-pink-500" />
       </div>
     );
   }
-  if (m.includes('pdf')) {
+  if (category === 'pdf') {
     return (
       <div className="w-full h-24 rounded-lg border border-slate-200/60 overflow-hidden flex items-center justify-center bg-red-50/40 shadow-xs">
         <FileText className="w-10 h-10 text-red-500" />
       </div>
     );
   }
-  if (m.includes('javascript') || m.includes('typescript') || m.includes('html') || m.includes('json') || m.includes('css')) {
+  if (category === 'word') {
+    return (
+      <div className="w-full h-24 rounded-lg border border-slate-200/60 overflow-hidden flex items-center justify-center bg-blue-50/40 shadow-xs">
+        <FileText className="w-10 h-10 text-blue-500" />
+      </div>
+    );
+  }
+  if (category === 'spreadsheet') {
+    return (
+      <div className="w-full h-24 rounded-lg border border-slate-200/60 overflow-hidden flex items-center justify-center bg-emerald-50/40 shadow-xs">
+        <FileSpreadsheet className="w-10 h-10 text-emerald-500" />
+      </div>
+    );
+  }
+  if (category === 'presentation') {
+    return (
+      <div className="w-full h-24 rounded-lg border border-slate-200/60 overflow-hidden flex items-center justify-center bg-orange-50/40 shadow-xs">
+        <Presentation className="w-10 h-10 text-orange-500" />
+      </div>
+    );
+  }
+  if (category === 'archive') {
+    return (
+      <div className="w-full h-24 rounded-lg border border-slate-200/60 overflow-hidden flex items-center justify-center bg-purple-50/40 shadow-xs">
+        <FileArchive className="w-10 h-10 text-purple-500" />
+      </div>
+    );
+  }
+  if (category === 'code') {
     return (
       <div className="w-full h-24 rounded-lg border border-slate-200/60 overflow-hidden flex items-center justify-center bg-amber-50/40 shadow-xs">
         <FileCode className="w-10 h-10 text-amber-500" />
+      </div>
+    );
+  }
+  if (category === 'text') {
+    return (
+      <div className="w-full h-24 rounded-lg border border-slate-200/60 overflow-hidden flex items-center justify-center bg-slate-50 shadow-xs">
+        <FileText className="w-10 h-10 text-slate-500" />
       </div>
     );
   }
@@ -123,8 +184,9 @@ const getFileIcon = (file: FileItem) => {
 const getFileIconTiny = (file: FileItem) => {
   if (file.type === 'folder') return <Folder className="w-5 h-5 text-brand-500 fill-brand-100 shrink-0" />;
   
-  const m = file.mime?.toLowerCase() || '';
-  if (m.startsWith('image/')) {
+  const category = getFileCategory(file.name, file.mime);
+
+  if (category === 'image') {
     return (
       <div className="w-6 h-6 rounded border border-slate-200 overflow-hidden flex items-center justify-center bg-slate-50 shrink-0 select-none shadow-xs">
         <img 
@@ -137,10 +199,15 @@ const getFileIconTiny = (file: FileItem) => {
     );
   }
   
-  if (m.startsWith('video/')) return <FileVideo className="w-5 h-5 text-indigo-500 shrink-0" />;
-  if (m.startsWith('audio/')) return <Music className="w-5 h-5 text-pink-500 shrink-0" />;
-  if (m.includes('javascript') || m.includes('typescript') || m.includes('html') || m.includes('json') || m.includes('css')) return <FileCode className="w-5 h-5 text-amber-500 shrink-0" />;
-  if (m.includes('pdf')) return <FileText className="w-5 h-5 text-red-500 shrink-0" />;
+  if (category === 'video') return <FileVideo className="w-5 h-5 text-indigo-500 shrink-0" />;
+  if (category === 'audio') return <Music className="w-5 h-5 text-pink-500 shrink-0" />;
+  if (category === 'pdf') return <FileText className="w-5 h-5 text-red-500 shrink-0" />;
+  if (category === 'word') return <FileText className="w-5 h-5 text-blue-500 shrink-0" />;
+  if (category === 'spreadsheet') return <FileSpreadsheet className="w-5 h-5 text-emerald-500 shrink-0" />;
+  if (category === 'presentation') return <Presentation className="w-5 h-5 text-orange-500 shrink-0" />;
+  if (category === 'archive') return <FileArchive className="w-5 h-5 text-purple-500 shrink-0" />;
+  if (category === 'code') return <FileCode className="w-5 h-5 text-amber-500 shrink-0" />;
+  if (category === 'text') return <FileText className="w-5 h-5 text-slate-500 shrink-0" />;
   
   return <File className="w-5 h-5 text-slate-400 shrink-0" />;
 };
@@ -281,53 +348,8 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
       setTextPreviewContent(null);
       return;
     }
-    const name = previewFile.name.toLowerCase();
-    const mime = (previewFile.mime || '').toLowerCase();
-    const isText = !name.endsWith('.svg') && !mime.includes('svg') && (
-                   mime.startsWith('text/') || 
-                   mime.includes('javascript') || 
-                   mime.includes('typescript') || 
-                   mime.includes('json') || 
-                   mime.includes('html') || 
-                   mime.includes('xml') ||
-                   mime.includes('sql') ||
-                   mime.includes('yaml') ||
-                   name.endsWith('.txt') || 
-                   name.endsWith('.js') || 
-                   name.endsWith('.jsx') || 
-                   name.endsWith('.ts') || 
-                   name.endsWith('.tsx') || 
-                   name.endsWith('.json') || 
-                   name.endsWith('.md') || 
-                   name.endsWith('.css') || 
-                   name.endsWith('.env') || 
-                   name.endsWith('.yml') || 
-                   name.endsWith('.yaml') ||
-                   name.endsWith('.csv') ||
-                   name.endsWith('.log') ||
-                   name.endsWith('.sql') ||
-                   name.endsWith('.sh') ||
-                   name.endsWith('.bash') ||
-                   name.endsWith('.py') ||
-                   name.endsWith('.java') ||
-                   name.endsWith('.cpp') ||
-                   name.endsWith('.c') ||
-                   name.endsWith('.h') ||
-                   name.endsWith('.cs') ||
-                   name.endsWith('.go') ||
-                   name.endsWith('.rs') ||
-                   name.endsWith('.php') ||
-                   name.endsWith('.rb') ||
-                   name.endsWith('.swift') ||
-                   name.endsWith('.kt') ||
-                   name.endsWith('.gradle') ||
-                   name.endsWith('.ini') ||
-                   name.endsWith('.conf') ||
-                   name.endsWith('.bat') ||
-                   name.endsWith('.cmd') ||
-                   name.endsWith('.toml') ||
-                   name.endsWith('.properties')
-                 );
+    const category = getFileCategory(previewFile.name, previewFile.mime);
+    const isText = category === 'code' || category === 'text';
 
     if (isText) {
       setLoadingText(true);
@@ -1289,22 +1311,14 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                       <code>{textPreviewContent || '(Empty file)'}</code>
                     </pre>
                   </div>
-                ) : (previewFile.mime?.startsWith('image/') || 
-                     previewFile.name.toLowerCase().endsWith('.png') || 
-                     previewFile.name.toLowerCase().endsWith('.jpg') || 
-                     previewFile.name.toLowerCase().endsWith('.jpeg') || 
-                     previewFile.name.toLowerCase().endsWith('.gif') || 
-                     previewFile.name.toLowerCase().endsWith('.webp') || 
-                     previewFile.name.toLowerCase().endsWith('.svg') || 
-                     previewFile.name.toLowerCase().endsWith('.ico') || 
-                     previewFile.name.toLowerCase().endsWith('.bmp')) ? (
+                ) : getFileCategory(previewFile.name, previewFile.mime) === 'image' ? (
                   <img 
                     src={getPublicUrl(previewFile.id, previewFile.name)} 
                     alt={previewFile.name} 
                     className="max-w-full max-h-full object-contain rounded-md shadow-sm"
                     referrerPolicy="no-referrer"
                   />
-                ) : previewFile.mime?.startsWith('video/') ? (
+                ) : getFileCategory(previewFile.name, previewFile.mime) === 'video' ? (
                   <video 
                     src={getPublicUrl(previewFile.id, previewFile.name)} 
                     controls 
@@ -1312,7 +1326,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                     autoPlay
                     muted
                   />
-                ) : previewFile.mime?.startsWith('audio/') ? (
+                ) : getFileCategory(previewFile.name, previewFile.mime) === 'audio' ? (
                   <div className="flex flex-col items-center justify-center py-12 px-6 bg-slate-900 rounded-xl w-full max-w-md shadow-md border border-slate-800">
                     <Music className="w-14 h-14 text-pink-500 animate-bounce mb-6" />
                     <audio 
@@ -1322,18 +1336,13 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                     />
                     <span className="text-[10px] mt-3 text-slate-400 font-mono tracking-tight font-medium">Audio streaming session</span>
                   </div>
-                ) : (previewFile.mime?.includes('pdf') || previewFile.name.toLowerCase().endsWith('.pdf')) ? (
+                ) : getFileCategory(previewFile.name, previewFile.mime) === 'pdf' ? (
                   <iframe 
                     src={getPublicUrl(previewFile.id, previewFile.name)} 
                     className="w-full h-[400px] border-none rounded-lg bg-white"
                     title={previewFile.name}
                   />
-                ) : (previewFile.name.toLowerCase().endsWith('.docx') ||
-                     previewFile.name.toLowerCase().endsWith('.doc') ||
-                     previewFile.name.toLowerCase().endsWith('.xlsx') ||
-                     previewFile.name.toLowerCase().endsWith('.xls') ||
-                     previewFile.name.toLowerCase().endsWith('.pptx') ||
-                     previewFile.name.toLowerCase().endsWith('.ppt')) ? (
+                ) : ['word', 'spreadsheet', 'presentation'].includes(getFileCategory(previewFile.name, previewFile.mime)) ? (
                   <div className="w-full h-full flex flex-col">
                     <div className="bg-slate-100 border border-slate-200 text-slate-700 text-[10px] px-3 py-1.5 rounded-lg mb-2 text-center font-medium">
                       Live document preview loaded via cloud office renderer.
@@ -1345,6 +1354,22 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                       className="w-full h-[380px] border-none rounded-lg bg-white shadow-inner"
                       title={previewFile.name}
                     />
+                  </div>
+                ) : getFileCategory(previewFile.name, previewFile.mime) === 'archive' ? (
+                  <div className="flex flex-col items-center justify-center py-10 px-6 bg-purple-50/50 rounded-xl w-full max-w-md shadow-sm border border-purple-100 text-center">
+                    <FileArchive className="w-16 h-16 text-purple-500 animate-pulse mb-4" />
+                    <h4 className="text-sm font-bold text-slate-800">Secure Compressed Archive Container</h4>
+                    <p className="text-xs text-slate-500 mt-2 max-w-xs mx-auto leading-relaxed">
+                      This is a compressed workspace bundle. Due to browser constraints, archive extractions must be executed locally.
+                    </p>
+                    <a
+                      href={getPublicUrl(previewFile.id, previewFile.name)}
+                      download={previewFile.name}
+                      className="mt-5 inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm shadow-purple-600/10 cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Download Archive File
+                    </a>
                   </div>
                 ) : (
                   <div className="text-center p-8">
