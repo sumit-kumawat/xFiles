@@ -8,6 +8,7 @@ import { Section, FileItem } from '@/types';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { safeHistory } from '@/lib/utils';
+import { X } from 'lucide-react';
 
 interface DashboardProps {
   user: any;
@@ -32,6 +33,7 @@ export default function Dashboard({ user }: DashboardProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [uploadPercent, setUploadPercent] = useState<number | null>(null);
   const [uploadingFilesCount, setUploadingFilesCount] = useState<number>(0);
+  const [dismissUploadProgress, setDismissUploadProgress] = useState(false);
 
   const navigateTo = (newSection: Section, newFolder: string | null, push: boolean = true) => {
     setSection(newSection);
@@ -76,6 +78,17 @@ export default function Dashboard({ user }: DashboardProps) {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowFolderModal(false);
+        setDismissUploadProgress(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleLogoRefresh = () => {
     navigateTo('my-storage', null, true);
     setSearchQuery('');
@@ -93,6 +106,7 @@ export default function Dashboard({ user }: DashboardProps) {
 
     setUploadingFilesCount(fileList.length);
     setUploadPercent(0);
+    setDismissUploadProgress(false);
     const toastId = toast.loading(`Preparing folder upload structures for ${fileList.length} items...`);
 
     try {
@@ -269,28 +283,7 @@ export default function Dashboard({ user }: DashboardProps) {
   };
 
   return (
-    <div 
-      className="flex flex-col h-screen bg-white relative"
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      {isDragging && (
-        <div className="absolute inset-0 bg-brand-500/10 border-4 border-dashed border-brand-500 backdrop-blur-[2px] z-[200] flex items-center justify-center pointer-events-none transition-all duration-300">
-          <div className="bg-white px-8 py-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4 border border-brand-100 scale-100 animate-pulse">
-            <div className="w-14 h-14 bg-brand-50 rounded-full flex items-center justify-center text-brand-500">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-            </div>
-            <div className="text-center">
-              <p className="text-lg font-bold text-slate-800 tracking-tight">Drop files anywhere to upload</p>
-              <p className="text-xs text-slate-500 mt-1">Files will be uploaded to your current folder</p>
-            </div>
-          </div>
-        </div>
-      )}
-
+    <div className="flex flex-col h-screen bg-white relative">
       <Navbar 
         user={user} 
         onUpload={handleUpload} 
@@ -335,7 +328,27 @@ export default function Dashboard({ user }: DashboardProps) {
           />
         </div>
         
-        <main className="flex-1 min-w-0 overflow-y-auto bg-surface-50 lg:rounded-2xl lg:border lg:border-surface-200 lg:shadow-xs relative">
+        <main 
+          className="flex-1 min-w-0 overflow-y-auto bg-surface-50 lg:rounded-2xl lg:border lg:border-surface-200 lg:shadow-xs relative"
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          {isDragging && (
+            <div className="absolute inset-0 bg-brand-500/10 border-4 border-dashed border-brand-500 backdrop-blur-[2px] z-[200] flex items-center justify-center pointer-events-none transition-all duration-300">
+              <div className="bg-white px-8 py-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4 border border-brand-100 scale-100 animate-pulse">
+                <div className="w-14 h-14 bg-brand-50 rounded-full flex items-center justify-center text-brand-500">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-bold text-slate-800 tracking-tight">Drop files to upload</p>
+                  <p className="text-xs text-slate-500 mt-1">Files will be uploaded to your current folder</p>
+                </div>
+              </div>
+            </div>
+          )}
           {section === 'admin' ? (
             <AdminDashboard />
           ) : (
@@ -412,14 +425,22 @@ export default function Dashboard({ user }: DashboardProps) {
 
       {/* Progress Overlay Widget */}
       <AnimatePresence>
-        {uploadPercent !== null && (
+        {uploadPercent !== null && !dismissUploadProgress && (
           <motion.div
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-[100] bg-white border border-slate-200 shadow-2xl rounded-2xl p-5 w-80 flex flex-col gap-3 animate-fade-in"
+            className="fixed bottom-6 right-6 z-[100] bg-white border border-slate-200 shadow-2xl rounded-2xl p-5 w-80 flex flex-col gap-3 animate-fade-in relative"
           >
-            <div className="flex items-center justify-between">
+            <button
+              onClick={() => setDismissUploadProgress(true)}
+              className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+              title="Dismiss"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+
+            <div className="flex items-center justify-between pr-5">
               <span className="text-sm font-bold text-slate-800 flex items-center gap-2">
                 <span className="flex h-2.5 w-2.5 relative">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>

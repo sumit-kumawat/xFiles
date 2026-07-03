@@ -277,18 +277,6 @@ export default function Sidebar({
             </button>
           </div>
         </div>
-        
-        <div className="px-2 pt-1 text-center sm:text-left text-[10px]">
-          <span className="text-slate-400">© {new Date().getFullYear()} </span>
-          <a 
-            href="https://conzex.com" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="font-bold bg-gradient-to-r from-[#FF9933] via-[#2563EB] to-[#16A34A] bg-clip-text text-transparent hover:opacity-80 transition-opacity"
-          >
-            A Conzex Global Product
-          </a>
-        </div>
       </div>
     </div>
   );

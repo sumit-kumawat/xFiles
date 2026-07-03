@@ -38,7 +38,6 @@ export default function Landing({ onGetStarted }: LandingProps) {
                 <span className="text-lg font-bold font-display tracking-tight text-brand-900 focus:outline-none animate-fade-in">xFiles</span>
                 <span className="bg-brand-50 text-brand-600 text-[8px] font-extrabold px-1 py-0.5 rounded border border-brand-100 uppercase tracking-wider">v2.0</span>
               </div>
-              <span className="text-[8px] text-slate-400 font-semibold tracking-tight mt-0.5 leading-none">A Conzex Global Product</span>
             </div>
           </div>
           
@@ -113,7 +112,7 @@ export default function Landing({ onGetStarted }: LandingProps) {
                   <img 
                     src="https://files.conzex.com/api/files/public/49b7e241-ffdb-4b2b-87d2-9ff482adeb9d/xFiles-Previews.png" 
                     alt="xFiles Core Dashboard" 
-                    className="w-full h-full object-contain bg-white"
+                    className="w-full h-full object-cover bg-white animate-fade-in"
                   />
                 </div>
               </div>
@@ -276,7 +275,6 @@ export default function Landing({ onGetStarted }: LandingProps) {
                     <span className="text-base font-bold font-display text-brand-900">xFiles</span>
                     <span className="bg-brand-50 text-brand-600 text-[8px] font-extrabold px-1 py-0.5 rounded border border-brand-100 uppercase tracking-wider">v2.0</span>
                   </div>
-                  <span className="text-[8px] text-slate-400 font-semibold tracking-tight mt-0.5 leading-none">A Conzex Global Product</span>
                 </div>
               </div>
               <p className="text-sm text-slate-500 mb-6 max-w-xs">

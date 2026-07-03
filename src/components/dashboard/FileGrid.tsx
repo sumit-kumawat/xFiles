@@ -425,13 +425,27 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
 
   const handleTrash = async (file: FileItem, e: React.MouseEvent) => {
     e.stopPropagation();
-    try {
-      await api.files.trash([file.id]);
-      toast.success('Moved to recycle bin');
-      onRefresh();
-    } catch (e) {
-      toast.error('Failed to trash item');
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Move to Recycle Bin?',
+      message: `Are you sure you want to move "${file.name}" to the Recycle Bin?`,
+      confirmText: 'Move to Trash',
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          await api.files.trash([file.id]);
+          toast.success('Moved to recycle bin');
+          setSelectedIds(prev => {
+            const next = new Set(prev);
+            next.delete(file.id);
+            return next;
+          });
+          onRefresh();
+        } catch (e) {
+          toast.error('Failed to trash item');
+        }
+      }
+    });
   };
 
   const handleRestore = async (file: FileItem, e: React.MouseEvent) => {
@@ -473,14 +487,23 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
 
   const handleBulkTrash = async () => {
     if (selectedIds.size === 0) return;
-    try {
-      await api.files.trash(Array.from(selectedIds));
-      toast.success(`Moved ${selectedIds.size} items to recycle bin`);
-      setSelectedIds(new Set());
-      onRefresh();
-    } catch (e) {
-      toast.error('Failed to trash items');
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Move Selected Items to Recycle Bin?',
+      message: `Are you sure you want to move these ${selectedIds.size} selected items to the Recycle Bin?`,
+      confirmText: 'Move to Trash',
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          await api.files.trash(Array.from(selectedIds));
+          toast.success(`Moved ${selectedIds.size} items to recycle bin`);
+          setSelectedIds(new Set());
+          onRefresh();
+        } catch (e) {
+          toast.error('Failed to trash items');
+        }
+      }
+    });
   };
 
   const handleBulkRestore = async () => {

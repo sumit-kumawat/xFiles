@@ -119,15 +119,14 @@ export default function Navbar({ user, onUpload, onCreateFolder, onSearch, onLog
           type="button"
           onClick={onLogoRefresh}
           className="flex items-center gap-2.5 text-left focus:outline-none transition-all active:scale-95 cursor-pointer group select-none"
-          title="xFiles - A Conzex Global Product"
+          title="xFiles"
         >
-          <img src="https://files.conzex.com/api/files/public/ee05804c-9547-4c7f-8c23-c32e89912eeb/circle-logo.svg" className="w-7 h-7 object-contain group-hover:rotate-12 transition-transform duration-300" alt="xFiles Logo" />
+          <img src="https://files.conzex.com/api/files/public/ee05804c-9547-4c7f-8c23-c32e89912eeb/circle-logo.svg" className="w-9 h-9 object-contain group-hover:rotate-12 transition-transform duration-300" alt="xFiles Logo" />
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-1.5 leading-none">
-              <span className="font-bold font-display tracking-tight text-[17px] text-brand-950 group-hover:text-brand-600 transition-colors">xFiles</span>
-              <span className="bg-brand-50 text-brand-600 text-[8px] font-extrabold px-1 py-0.5 rounded border border-brand-100 uppercase tracking-wider">v2.0</span>
+              <span className="font-bold font-display tracking-tight text-[20px] text-brand-950 group-hover:text-brand-600 transition-colors">xFiles</span>
+              <span className="bg-brand-50 text-brand-600 text-[9px] font-extrabold px-1.5 py-0.5 rounded border border-brand-100 uppercase tracking-wider">v2.0</span>
             </div>
-            <span className="text-[8.5px] text-slate-400 font-semibold tracking-tight mt-0.5 leading-none">A Conzex Global Product</span>
           </div>
         </button>
       </div>

@@ -51,16 +51,15 @@ export default function Auth({ onToggle, onLogin }: AuthProps) {
   };
 
   return (
-    <div className="min-h-screen bg-surface-100 flex flex-col items-center justify-center p-4">
+    <div className="fixed inset-0 overflow-hidden bg-surface-100 flex flex-col items-center justify-center p-4">
       {/* Branding for Login/Signup */}
-      <div className="mb-8 flex items-center gap-3">
+      <div className="mb-6 flex items-center gap-3">
         <img src="https://files.conzex.com/api/files/public/ee05804c-9547-4c7f-8c23-c32e89912eeb/circle-logo.svg" className="w-10 h-10 object-contain" alt="xFiles Logo" />
         <div className="flex flex-col justify-center">
           <div className="flex items-center gap-2 leading-none">
             <span className="text-2xl font-bold font-display tracking-tight text-slate-900">xFiles</span>
             <span className="bg-brand-50 text-brand-600 text-[9px] font-extrabold px-1.5 py-0.5 rounded border border-brand-100 uppercase tracking-wider">v2.0</span>
           </div>
-          <span className="text-[9px] text-slate-400 font-semibold tracking-tight mt-1 leading-none">A Conzex Global Product</span>
         </div>
       </div>
 
@@ -214,8 +213,16 @@ export default function Auth({ onToggle, onLogin }: AuthProps) {
         </CardContent>
       </Card>
 
-      <div className="mt-8 text-center text-sm text-slate-400 font-medium">
-        <button onClick={onToggle} className="hover:text-slate-600">Back to Home</button>
+      <div className="mt-6 flex flex-col items-center gap-1.5 text-center">
+        <button onClick={onToggle} className="text-sm text-slate-400 font-medium hover:text-slate-600 mb-1">
+          Back to Home
+        </button>
+        <span className="text-xs text-slate-400 font-semibold font-sans">
+          © Conzex Global Private Limited
+        </span>
+        <span className="text-xs text-slate-400/80 font-mono font-medium">
+          Encryption Mode: AES-256 GCM • Status: Protected • Version: 2.0
+        </span>
       </div>
     </div>
   );
