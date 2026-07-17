@@ -231,7 +231,7 @@ export default function AdminDashboard() {
                   <div className="w-2 h-2 rounded-full bg-emerald-500" />
                   <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Core Engine</span>
                 </div>
-                <p className="text-[10px] text-slate-500 leading-tight">xFiles v2.0 Enterprise Edition running on SQLite Distributed Core.</p>
+                <p className="text-[10px] text-slate-500 leading-tight">Files v2.0 Enterprise Edition running on SQLite Distributed Core.</p>
              </div>
           </div>
         </div>

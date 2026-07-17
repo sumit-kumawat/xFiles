@@ -32,10 +32,10 @@ export default function Landing({ onGetStarted }: LandingProps) {
       <header className="sticky top-0 z-50 w-full border-b border-surface-200 bg-white/80 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="https://files.conzex.com/api/files/public/ee05804c-9547-4c7f-8c23-c32e89912eeb/circle-logo.svg" className="w-8 h-8 object-contain" alt="xFiles Logo" />
+            <img src="https://files.conzex.com/api/files/public/f32f130c-199c-4d0b-8fd5-4134757a71d9/icon-rounded.png" className="w-8 h-8 object-contain" alt="Files Logo" />
             <div className="flex flex-col justify-center">
               <div className="flex items-center gap-1.5 leading-none">
-                <span className="text-lg font-bold font-display tracking-tight text-brand-900 focus:outline-none animate-fade-in">xFiles</span>
+                <span className="text-lg font-bold font-display tracking-tight text-brand-900 focus:outline-none animate-fade-in">Files</span>
                 <span className="bg-brand-50 text-brand-600 text-[8px] font-extrabold px-1 py-0.5 rounded border border-brand-100 uppercase tracking-wider">v2.0</span>
               </div>
             </div>
@@ -110,7 +110,7 @@ export default function Landing({ onGetStarted }: LandingProps) {
               <div className="rounded-2xl border border-slate-200 bg-white p-1.5 shadow-2xl relative z-10 transition-transform hover:scale-[1.002] duration-500 overflow-hidden">
                 <img 
                   src="https://files.conzex.com/api/files/public/4bca6e49-1502-469c-83ec-0698e46b5abf/xFiles-Previews.png" 
-                  alt="xFiles Core Dashboard" 
+                  alt="Files Core Dashboard" 
                   className="w-full h-auto object-contain rounded-xl bg-white border border-slate-100 animate-fade-in"
                 />
               </div>
@@ -165,7 +165,7 @@ export default function Landing({ onGetStarted }: LandingProps) {
             </div>
             <h2 className="text-4xl font-bold mb-6 tracking-tight text-slate-900">Built for Enterprise Compliance</h2>
             <p className="text-lg text-slate-600 mb-16 leading-relaxed">
-              xFiles is engineered to meet the strictest IT standards. From HIPAA to GDPR, our core gives you the primitives you need to stay compliant and secure your data sovereignty.
+              Files is engineered to meet the strictest IT standards. From HIPAA to GDPR, our core gives you the primitives you need to stay compliant and secure your data sovereignty.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -267,10 +267,10 @@ export default function Landing({ onGetStarted }: LandingProps) {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
             <div className="col-span-2 lg:col-span-1">
               <div className="flex items-center gap-2.5 mb-6">
-                <img src="https://files.conzex.com/api/files/public/ee05804c-9547-4c7f-8c23-c32e89912eeb/circle-logo.svg" className="w-8 h-8 object-contain" alt="xFiles Logo" />
+                <img src="https://files.conzex.com/api/files/public/f32f130c-199c-4d0b-8fd5-4134757a71d9/icon-rounded.png" className="w-8 h-8 object-contain" alt="Files Logo" />
                 <div className="flex flex-col justify-center">
                   <div className="flex items-center gap-1.5 leading-none">
-                    <span className="text-base font-bold font-display text-brand-900">xFiles</span>
+                    <span className="text-base font-bold font-display text-brand-900">Files</span>
                     <span className="bg-brand-50 text-brand-600 text-[8px] font-extrabold px-1 py-0.5 rounded border border-brand-100 uppercase tracking-wider">v2.0</span>
                   </div>
                 </div>
@@ -329,7 +329,7 @@ export default function Landing({ onGetStarted }: LandingProps) {
           
           <div className="border-t border-surface-100 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-sm text-slate-400">
-              © 2026 xFiles | All rights reserved
+              © 2026 Files | All rights reserved
             </div>
             <div className="text-sm">
               <a 

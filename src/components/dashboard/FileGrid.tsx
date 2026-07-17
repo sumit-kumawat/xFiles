@@ -1685,7 +1685,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                   >
                     <div className="flex items-center gap-2">
                       <Folder className="w-4.5 h-4.5 text-brand-500 fill-brand-50" />
-                      <span>Home Root (xFiles)</span>
+                      <span>Home Root (Files)</span>
                     </div>
                   </button>
 

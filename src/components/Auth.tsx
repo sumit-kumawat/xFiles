@@ -54,10 +54,10 @@ export default function Auth({ onToggle, onLogin }: AuthProps) {
     <div className="fixed inset-0 overflow-hidden bg-surface-100 flex flex-col items-center justify-center p-4">
       {/* Branding for Login/Signup */}
       <div className="mb-5 flex flex-col items-center gap-2">
-        <img src="https://files.conzex.com/api/files/public/ee05804c-9547-4c7f-8c23-c32e89912eeb/circle-logo.svg" className="w-16 h-16 object-contain drop-shadow-sm group-hover:rotate-6 transition-transform duration-300" alt="xFiles Logo" />
+        <img src="https://files.conzex.com/api/files/public/f32f130c-199c-4d0b-8fd5-4134757a71d9/icon-rounded.png" className="w-16 h-16 object-contain drop-shadow-sm group-hover:rotate-6 transition-transform duration-300" alt="Files Logo" />
         <div className="flex flex-col items-center justify-center">
           <div className="flex items-center gap-2 leading-none">
-            <span className="text-3xl font-extrabold font-display tracking-tight text-brand-950">xFiles</span>
+            <span className="text-3xl font-extrabold font-display tracking-tight text-brand-950">Files</span>
             <span className="bg-brand-50 text-brand-600 text-[9.5px] font-extrabold px-1.5 py-0.5 rounded border border-brand-100 uppercase tracking-wider">v2.0</span>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function Auth({ onToggle, onLogin }: AuthProps) {
           </div>
           <CardDescription className="text-slate-500">
             {mode === 'login' && 'Enter your username or email to continue'}
-            {mode === 'signup' && 'Join xFiles for enterprise cloud storage'}
+            {mode === 'signup' && 'Join Files for enterprise cloud storage'}
             {mode === 'forgot' && 'Enter your email to receive a reset link'}
           </CardDescription>
         </CardHeader>

@@ -89,7 +89,7 @@ export default function App() {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-surface-50">
         <Loader2 className="h-10 w-10 text-brand-500 animate-spin" />
-        <p className="mt-4 text-slate-500 font-medium">Initializing xFiles...</p>
+        <p className="mt-4 text-slate-500 font-medium">Initializing Files...</p>
       </div>
     );
   }
@@ -98,7 +98,7 @@ export default function App() {
   if (user && !user.emailVerified && user.email !== 'admin@conzex.com') {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-surface-50 p-6">
-        <title>Verify Email | xFiles</title>
+        <title>Verify Email | Files</title>
         <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg border border-surface-200 text-center">
           <div className="w-16 h-16 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,7 +117,7 @@ export default function App() {
                   const currentUser = await api.auth.me();
                   if (currentUser && currentUser.emailVerified) {
                     setUser(currentUser);
-                    toast.success("Verification successful! Welcome to xFiles.");
+                    toast.success("Verification successful! Welcome to Files.");
                   } else {
                     toast.error("Your email is not verified yet. Please check your inbox for the verification email.");
                   }
@@ -179,7 +179,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-surface-50 selection:bg-brand-100 selection:text-brand-700">
-      <title>xFiles</title>
+      <title>Files</title>
       <meta name="description" content="Secure, fast, and professional cloud storage for everyone. Host your data your way." />
       
       <Toaster richColors position="bottom-center" />
