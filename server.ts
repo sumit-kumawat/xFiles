@@ -62,6 +62,16 @@ const extensionMimeTypes: { [key: string]: string } = {
   'ppt': 'application/vnd.ms-powerpoint',
   'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'txt': 'text/plain',
+  'log': 'text/plain',
+  'ini': 'text/plain',
+  'conf': 'text/plain',
+  'env': 'text/plain',
+  'md': 'text/markdown',
+  'toml': 'text/plain',
+  'properties': 'text/plain',
+  'sh': 'text/plain',
+  'bash': 'text/plain',
+  'sql': 'text/plain',
   'csv': 'text/csv',
   'html': 'text/html',
   'css': 'text/css',
@@ -655,33 +665,84 @@ app.post('/api/files/upload', authenticate, upload.array('files'), (req: any, re
     `);
 
     const results = files.map(file => {
-      const id = uuidv4();
       let pid = parentId;
       if (pid === 'null' || pid === 'undefined' || !pid) pid = null;
 
-      insertFileStmt.run(
-        id,
-        file.originalname || 'Unnamed File',
-        file.size || 0,
-        resolveFileMime(file.originalname || '', file.mimetype),
-        pid,
-        req.user.id,
-        file.filename || ''
-      );
-      
-      // Update user storage used
-      updateStorageStmt.run(file.size || 0, req.user.id);
+      const fileName = file.originalname || 'Unnamed File';
 
-      // Track in activity log
-      insertActivityStmt.run(
-        uuidv4(),
-        req.user.id,
-        'upload',
-        id,
-        file.originalname || 'Unnamed File'
-      );
+      // Find existing non-deleted file with same name, parent_id, and type = 'file' for this user
+      const existingFile = db.prepare('SELECT id, size, storage_path FROM files WHERE name = ? AND parent_id ' + (pid ? '= ?' : 'IS NULL') + ' AND type = \'file\' AND user_id = ? AND deleted = 0').get(fileName, ...(pid ? [pid] : []), req.user.id) as any;
 
-      return { id, name: file.originalname, type: 'file', size: file.size };
+      if (existingFile) {
+        const id = existingFile.id;
+        const oldSize = existingFile.size || 0;
+        const oldStoragePath = existingFile.storage_path;
+
+        // Delete old physical file if it exists
+        if (oldStoragePath) {
+          const oldFilePath = path.join(_dirname, 'uploads', oldStoragePath);
+          if (fs.existsSync(oldFilePath)) {
+            try {
+              fs.unlinkSync(oldFilePath);
+            } catch (err) {
+              console.error('Failed to delete old physical file:', err);
+            }
+          }
+        }
+
+        // Update existing record with the new file details, resetting modified_at to CURRENT_TIMESTAMP
+        db.prepare(`
+          UPDATE files 
+          SET size = ?, mime = ?, storage_path = ?, modified_at = CURRENT_TIMESTAMP 
+          WHERE id = ?
+        `).run(
+          file.size || 0,
+          resolveFileMime(fileName, file.mimetype),
+          file.filename || '',
+          id
+        );
+
+        // Adjust user storage: subtract old size, add new size
+        const sizeDifference = (file.size || 0) - oldSize;
+        updateStorageStmt.run(sizeDifference, req.user.id);
+
+        // Track in activity log (upload overwrite action)
+        insertActivityStmt.run(
+          uuidv4(),
+          req.user.id,
+          'upload_update',
+          id,
+          fileName
+        );
+
+        return { id, name: fileName, type: 'file', size: file.size };
+      } else {
+        // Normal insert
+        const id = uuidv4();
+        insertFileStmt.run(
+          id,
+          fileName,
+          file.size || 0,
+          resolveFileMime(fileName, file.mimetype),
+          pid,
+          req.user.id,
+          file.filename || ''
+        );
+        
+        // Update user storage used
+        updateStorageStmt.run(file.size || 0, req.user.id);
+
+        // Track in activity log
+        insertActivityStmt.run(
+          uuidv4(),
+          req.user.id,
+          'upload',
+          id,
+          fileName
+        );
+
+        return { id, name: fileName, type: 'file', size: file.size };
+      }
     });
 
     res.json(results);
@@ -693,11 +754,22 @@ app.post('/api/files/upload', authenticate, upload.array('files'), (req: any, re
 
 app.post('/api/files/mkdir', authenticate, (req: any, res) => {
   const { name, parentId } = req.body;
+  let pid = parentId;
+  if (pid === 'null' || pid === 'undefined' || !pid) pid = null;
+
+  // Find existing non-deleted folder with same name, parent_id, and type = 'folder' for this user
+  const existingFolder = db.prepare('SELECT id FROM files WHERE name = ? AND parent_id ' + (pid ? '= ?' : 'IS NULL') + ' AND type = \'folder\' AND user_id = ? AND deleted = 0').get(name, ...(pid ? [pid] : []), req.user.id) as any;
+
+  if (existingFolder) {
+    // Return existing folder details to preserve the ID
+    return res.json({ id: existingFolder.id, name, type: 'folder', parentId: pid });
+  }
+
   const id = generateAlphanumericId(10);
   db.prepare(`
     INSERT INTO files (id, name, type, parent_id, user_id)
     VALUES (?, ?, 'folder', ?, ?)
-  `).run(id, name, parentId || null, req.user.id);
+  `).run(id, name, pid, req.user.id);
   
   // Track in activity log
   db.prepare(`
@@ -705,7 +777,7 @@ app.post('/api/files/mkdir', authenticate, (req: any, res) => {
     VALUES (?, ?, ?, ?, ?)
   `).run(uuidv4(), req.user.id, 'mkdir', id, name);
 
-  res.json({ id, name, type: 'folder', parentId });
+  res.json({ id, name, type: 'folder', parentId: pid });
 });
 
 app.get('/api/folders/path/:id', authenticate, (req: any, res) => {
@@ -1160,6 +1232,10 @@ app.get('/api/files/public/:id/:filename', (req: any, res) => {
   const resolvedMime = resolveFileMime(file.name, file.mime);
   res.setHeader('Content-Type', resolvedMime);
 
+  if (req.query.download === 'true') {
+    res.setHeader('Content-Disposition', 'attachment; filename="' + encodeURIComponent(file.name) + '"');
+  }
+
   // Cross-Origin Resource Sharing (CORS) headers for other development platforms
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -1181,6 +1257,10 @@ app.get('/api/files/public/:id', (req: any, res) => {
 
   const resolvedMime = resolveFileMime(file.name, file.mime);
   res.setHeader('Content-Type', resolvedMime);
+
+  if (req.query.download === 'true') {
+    res.setHeader('Content-Disposition', 'attachment; filename="' + encodeURIComponent(file.name) + '"');
+  }
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');

@@ -73,7 +73,7 @@ const getFileCategory = (name: string, mime?: string): string => {
   if (['doc', 'docx'].includes(ext) || m.includes('word') || m.includes('msword') || m.includes('officedocument.wordprocessingml')) return 'word';
   if (['xls', 'xlsx', 'csv'].includes(ext) || m.includes('excel') || m.includes('spreadsheet') || m.includes('officedocument.spreadsheetml') || m.includes('csv')) return 'spreadsheet';
   if (['ppt', 'pptx'].includes(ext) || m.includes('powerpoint') || m.includes('presentation') || m.includes('officedocument.presentationml')) return 'presentation';
-  if (ext === 'txt' || m.startsWith('text/plain')) return 'text';
+  if (['txt', 'log', 'ini', 'conf', 'env', 'md', 'toml', 'properties'].includes(ext) || m.startsWith('text/plain')) return 'text';
 
   if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp', 'ico'].includes(ext) || m.startsWith('image/')) return 'image';
   if (['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp'].includes(ext) || m.startsWith('video/')) return 'video';
@@ -81,7 +81,7 @@ const getFileCategory = (name: string, mime?: string): string => {
   
   if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'dmg', 'iso'].includes(ext) || m.includes('zip') || m.includes('compressed') || m.includes('archive')) return 'archive';
   
-  if (['js', 'jsx', 'ts', 'tsx', 'html', 'css', 'json', 'py', 'java', 'cpp', 'c', 'h', 'cs', 'go', 'rs', 'php', 'rb', 'swift', 'kt', 'xml', 'yaml', 'yml', 'sh', 'bash', 'sql'].includes(ext) || 
+  if (['js', 'jsx', 'ts', 'tsx', 'html', 'css', 'json', 'py', 'java', 'cpp', 'c', 'h', 'cs', 'go', 'rs', 'php', 'rb', 'swift', 'kt', 'xml', 'yaml', 'yml', 'sh', 'bash', 'sql', 'md', 'graphql', 'dockerfile'].includes(ext) || 
       m.includes('javascript') || m.includes('typescript') || m.includes('html') || m.includes('json') || m.includes('css') || m.includes('code') || m.startsWith('text/')) return 'code';
 
   return 'generic';
@@ -591,7 +591,32 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
   };
 
   const renderBreadcrumbs = () => {
-    return null;
+    if (section !== 'my-storage' && section !== 'starred' && section !== 'recent' && section !== 'shared') return null;
+
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-slate-500 font-semibold select-none flex-wrap">
+        <button 
+          onClick={onBackToRoot}
+          className="hover:text-brand-600 transition-colors cursor-pointer text-slate-400 font-bold"
+        >
+          {section === 'my-storage' ? 'My Drive' : section === 'starred' ? 'Starred' : section === 'recent' ? 'Recent' : 'Shared with me'}
+        </button>
+        {folderPath && folderPath.map((item, index) => (
+          <React.Fragment key={item.id}>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-350 shrink-0" />
+            <button
+              onClick={() => onFileClick({ id: item.id, type: 'folder', name: item.name } as FileItem)}
+              className={`hover:text-brand-600 transition-colors cursor-pointer truncate max-w-[120px] ${
+                index === folderPath.length - 1 ? 'text-slate-800 font-bold' : ''
+              }`}
+              title={item.name}
+            >
+              {item.name}
+            </button>
+          </React.Fragment>
+        ))}
+      </div>
+    );
   };
 
   if (loading) {
@@ -1596,7 +1621,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                   </button>
 
                   <a 
-                    href={`/api/files/view/${previewFile.id}`}
+                    href={getPublicUrl(previewFile.id, previewFile.name)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 px-3 py-2 bg-white border border-surface-200 hover:bg-surface-50 text-slate-600 rounded-xl font-bold transition-all"
@@ -1606,7 +1631,7 @@ export default function FileGrid({ files, loading, onFileClick, onRefresh, secti
                   </a>
 
                   <a 
-                    href={`/api/files/download/${previewFile.id}`}
+                    href={`${getPublicUrl(previewFile.id, previewFile.name)}?download=true`}
                     className="flex items-center gap-1.5 px-4 py-2 bg-brand-500 text-white rounded-xl font-bold hover:bg-brand-600 shadow-md shadow-brand-500/15 transition-all"
                   >
                     <Download className="w-3.5 h-3.5" />

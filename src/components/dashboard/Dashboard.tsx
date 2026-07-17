@@ -257,20 +257,32 @@ export default function Dashboard({ user }: DashboardProps) {
     }
   };
 
-  const handleSidebarDropInternal = async (itemId: string, targetSection: Section) => {
+  const handleSidebarDropInternal = async (itemIdRaw: string, targetSection: Section) => {
+    let ids: string[] = [];
+    try {
+      if (itemIdRaw.trim().startsWith('[')) {
+        ids = JSON.parse(itemIdRaw);
+      } else {
+        ids = [itemIdRaw];
+      }
+    } catch {
+      ids = [itemIdRaw];
+    }
+    if (ids.length === 0) return;
+
     try {
       if (targetSection === 'trash') {
-        await api.files.trash([itemId]);
-        toast.success("Moved item to Recycle Bin");
+        await api.files.trash(ids);
+        toast.success(`Moved ${ids.length} item(s) to Recycle Bin`);
       } else if (targetSection === 'my-storage') {
-        await api.files.move([itemId], null);
-        await api.files.restore([itemId]).catch(() => {});
-        toast.success("Moved item to My Drive (Root)");
+        await api.files.move(ids, null);
+        await api.files.restore(ids).catch(() => {});
+        toast.success(`Moved ${ids.length} item(s) to My Drive (Root)`);
       }
       loadFiles();
       loadStats();
     } catch (err: any) {
-      toast.error(err.message || "Failed to move item");
+      toast.error(err.message || "Failed to move item(s)");
     }
   };
 
